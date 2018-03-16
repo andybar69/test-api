@@ -21,7 +21,6 @@ class AuthorController extends Controller
     public function newAction(Request $request)
     {
         $response = new JsonResponse();
-        $response->headers->set('Content-Type', 'application/json');
         $data = json_decode($request->getContent(), true);
         if (json_last_error() !== JSON_ERROR_NONE) {
             $response->setData(['message' => json_last_error_msg()])->setStatusCode(400);
@@ -90,6 +89,35 @@ class AuthorController extends Controller
         }
 
         return $response->setData($data)->setStatusCode(200);
+    }
+
+    /**
+     * @Route("/api/authors/{id}")
+     * @Method("PUT")
+     */
+    public function updateAction(Request $request, $id)
+    {
+        $author = $this->getDoctrine()
+            ->getManager()
+            ->getRepository(Author::class)
+            ->find($id)
+        ;
+        if (null === $author) {
+            throw $this->createNotFoundException(sprintf('No author found with ID "%s"', $id));
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $form = $this->createForm(AuthorType::class, $author);
+        $form->submit($data);
+
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($author);
+        $em->flush();
+
+        $data = $this->serializeAuthor($author);
+
+        return new JsonResponse($data, 200);
+
     }
 
     protected function serializeAuthor(Author $author)

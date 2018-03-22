@@ -47,6 +47,13 @@ class Author
     private $books;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="nickname", type="string", length=255, nullable=true)
+     */
+    private $nickname;
+
+    /**
      * @var Review
      */
     private $review;
@@ -185,5 +192,28 @@ class Author
         $this->createdAt = new \DateTime("now");
     }
 
-}
 
+    /**
+     * Set nickname
+     *
+     * @param string $nickname
+     *
+     * @return Author
+     */
+    public function setNickname($nickname)
+    {
+        $this->nickname = $nickname;
+
+        return $this;
+    }
+
+    /**
+     * Get nickname
+     *
+     * @return string
+     */
+    public function getNickname()
+    {
+        return $this->nickname;
+    }
+}

@@ -16,13 +16,17 @@ class AuthorType extends AbstractType
         $builder
             ->add('firstName', TextType::class)
             ->add('lastName', TextType::class)
+            ->add('nickname', TextType::class/*, [
+                // readonly if we're in edit mode
+                'disabled' => $options['is_edit']
+            ]*/)
             ;
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => Author::class
+            'data_class' => Author::class,
         ));
     }
 

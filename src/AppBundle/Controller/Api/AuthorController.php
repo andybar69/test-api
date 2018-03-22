@@ -3,46 +3,40 @@
 namespace AppBundle\Controller\Api;
 
 use AppBundle\Form\AuthorType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use AppBundle\Controller\BaseController;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use AppBundle\Entity\Author;
+use AppBundle\Form\UpdateAuthorType;
 
 
-class AuthorController extends Controller
+class AuthorController extends BaseController
 {
     /**
      * @Route("/api/authors")
      * @Method("POST")
+     * @param Request $request
+     * @return Response
      */
     public function newAction(Request $request)
     {
-        $response = new JsonResponse();
-        $data = json_decode($request->getContent(), true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            $response->setData(['message' => json_last_error_msg()])->setStatusCode(400);
-        }
-        try {
-            $author = new Author();
-            $form = $this->createForm(AuthorType::class, $author);
-            $form->submit($data);
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($author);
-            $em->flush();
+        $author = new Author();
+        $form = $this->createForm(AuthorType::class, $author);
+        $this->processForm($request, $form);
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($author);
+        $em->flush();
 
-            $data = $this->serializeAuthor($author);
-            $authorUrl = $this->generateUrl('api_authors_show', ['id' => $author->getId()]);
-            $response
-                ->setData($data)
-                ->setStatusCode(201)
-                ->headers->set('Location', $authorUrl);
-        }
-        catch (\Exception $ex) {
-            $response->setData(['message' => $ex->getMessage()])->setStatusCode(500);
-        }
+        $response = $this->createApiResponse($author, 201);
+        $authorUrl = $this->generateUrl(
+            'api_authors_show',
+            ['id' => $author->getId()]
+        );
+        $response->headers->set('Location', $authorUrl);
 
         return $response;
     }
@@ -53,21 +47,18 @@ class AuthorController extends Controller
      */
     public function showAction($id)
     {
-        $response = new JsonResponse();
-
         $author = $this->getDoctrine()
             ->getManager()
             ->getRepository(Author::class)
-            ->find($id)
-        ;
+            ->find($id);
 
         if (null === $author) {
             throw $this->createNotFoundException(sprintf('No author found with ID "%s"', $id));
         }
 
-        $data = $this->serializeAuthor($author);
+        $response = $this->createApiResponse($author, 200);
 
-        return $response->setData($data)->setStatusCode(200);
+        return $response;
     }
 
     /**
@@ -76,24 +67,20 @@ class AuthorController extends Controller
      */
     public function listAction()
     {
-        $response = new JsonResponse();
-
         $authors = $this->getDoctrine()
             ->getManager()
             ->getRepository(Author::class)
             ->findAll()
         ;
-        $data = ['authors' => []];
-        foreach ($authors as $author) {
-            $data['authors'][] = $this->serializeAuthor($author);
-        }
 
-        return $response->setData($data)->setStatusCode(200);
+        $response = $this->createApiResponse(['authors' => $authors], 200);
+
+        return $response;
     }
 
     /**
      * @Route("/api/authors/{id}")
-     * @Method("PUT")
+     * @Method({"PUT", "PATCH"})
      */
     public function updateAction(Request $request, $id)
     {
@@ -106,18 +93,37 @@ class AuthorController extends Controller
             throw $this->createNotFoundException(sprintf('No author found with ID "%s"', $id));
         }
 
-        $data = json_decode($request->getContent(), true);
-        $form = $this->createForm(AuthorType::class, $author);
-        $form->submit($data);
+        $form = $this->createForm(UpdateAuthorType::class, $author);
+        $this->processForm($request, $form);
 
         $em = $this->getDoctrine()->getManager();
         $em->persist($author);
         $em->flush();
 
-        $data = $this->serializeAuthor($author);
+        $response = $this->createApiResponse($author, 200);
 
-        return new JsonResponse($data, 200);
+        return $response;
+    }
 
+    /**
+     * @Route("/api/authors/{id}")
+     * @Method("DELETE")
+     */
+    public function deleteAction($id)
+    {
+        $author = $this->getDoctrine()
+            ->getManager()
+            ->getRepository(Author::class)
+            ->find($id)
+        ;
+
+        if ($author) {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($author);
+            $em->flush();
+        }
+
+        return new JsonResponse(null, 204);
     }
 
     protected function serializeAuthor(Author $author)
@@ -125,6 +131,24 @@ class AuthorController extends Controller
         return [
             'firstName' => $author->getFirstName(),
             'lastName' => $author->getLastName(),
+            'nickname' => $author->getNickname(),
         ];
     }
+
+    private function processForm(Request $request, FormInterface $form)
+    {
+        $data = $this->jsonDecode($request->getContent());
+        $clearMissing = $request->getMethod() != 'PATCH';
+        $form->submit($data, $clearMissing);
+    }
+
+    private function jsonDecode($var)
+    {
+        $data = json_decode($var, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception(json_last_error_msg());
+        }
+        return $data;
+    }
+
 }

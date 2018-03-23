@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
+use JMS\Serializer\Annotation as Serializer;
 
 
 /**
@@ -12,6 +13,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @ORM\Table(name="author")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\AuthorRepository")
  * @ORM\HasLifecycleCallbacks
+ * @Serializer\ExclusionPolicy("all")
  */
 class Author
 {
@@ -28,6 +30,7 @@ class Author
      * @var string
      *
      * @ORM\Column(name="first_name", type="string", length=255)
+     * @Serializer\Expose
      */
     private $firstName;
 
@@ -35,6 +38,7 @@ class Author
      * @var string
      *
      * @ORM\Column(name="last_name", type="string", length=255)
+     * @Serializer\Expose
      */
     private $lastName;
 
@@ -50,6 +54,7 @@ class Author
      * @var string
      *
      * @ORM\Column(name="nickname", type="string", length=255, nullable=true)
+     * @Serializer\Expose
      */
     private $nickname;
 

@@ -13,7 +13,7 @@ class BaseController extends Controller
     {
         $json = $this->serialize($data);
         return new Response($json, $statusCode, array(
-            'Content-Type' => 'application/json'
+            'Content-Type' => 'application/json;charset=UTF-8'
         ));
     }
     protected function serialize($data, $format = 'json')

@@ -5,7 +5,7 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
-
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Author
@@ -53,6 +53,7 @@ class Author
     /**
      * @var string
      *
+     * @Assert\NotBlank(message="Please enter a clever nickname")
      * @ORM\Column(name="nickname", type="string", length=255, nullable=true)
      * @Serializer\Expose
      */

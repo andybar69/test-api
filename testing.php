@@ -2,24 +2,6 @@
 
 require __DIR__.'/vendor/autoload.php';
 
-$hostname='10.0.37.123';
-$db = 'pr1026db304';
-$username='appr1026db30';
-$password='KxofbG34*';
-
-try {
-    $dbh = new PDO("mysql:host=$hostname;port=3339;dbname=$db",$username,$password);
-
-    $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    echo 'Connected to Database'.PHP_EOL;
-
-}
-catch(PDOException $e)
-{
-    echo $e->getMessage().PHP_EOL;
-}
-
-
 $client = new \GuzzleHttp\Client([
     'base_uri' => 'http://test.dev',
     //'http_errors' => false
@@ -27,11 +9,10 @@ $client = new \GuzzleHttp\Client([
 
 
 $data = [
-    'firstName' => 'Garry',
-    'lastName' => 'Lineker',
-    'nickname' => 'goaleodor'
+    'firstName' => 'aaa',
+    'lastName' => 'bbbb',
 ];
-/*
+
 try {
     $response = $client->post('/test-api/web/app_dev.php/api/authors', [
         'headers' => [
@@ -53,8 +34,8 @@ try {
 catch (GuzzleHttp\Exception\RequestException $ex) {
     printError($ex);
 }
-*/
 
+/*
 try {
     $response = $client->get('/test-api/web/app_dev.php/api/authors', [
         'headers' => [

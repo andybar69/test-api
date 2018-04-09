@@ -2,11 +2,9 @@
 
 namespace Tests\AppBundle\Controller\Api;
 
-//use Symfony\Bundle\FrameworkBundle\Tests\TestCase;
-
-//use PHPUnit\Framework\TestCase;
-use Tests\AppBundle\ApiTestCase;
 use GuzzleHttp;
+use Tests\AppBundle\ApiTestCase;
+
 
 class AuthorControllerTest extends ApiTestCase
 {
@@ -49,5 +47,21 @@ class AuthorControllerTest extends ApiTestCase
     public function testUPDATEAuthor()
     {
 
+    }
+
+    public function testValidationErrors()
+    {
+        $data = [
+            'firstName' => 'user_'.substr(uniqid(), 0, 10),
+            'lastName' => 'first_'.substr(uniqid(), 0, 10),
+        ];
+        $response = $this->client->post('/test-api/web/app_dev.php/api/authors', [
+            'headers' => [
+                'Content-Type' => 'application/json;charset=UTF-8',
+            ],
+            GuzzleHttp\RequestOptions::JSON => $data,
+        ]);
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->assertEquals('application/problem+json', $response->getHeader('Content-Type'));
     }
 }

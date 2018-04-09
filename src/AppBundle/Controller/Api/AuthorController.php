@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use AppBundle\Entity\Author;
 use AppBundle\Form\UpdateAuthorType;
+use AppBundle\Api\ApiProblem;
+
 
 
 class AuthorController extends BaseController
@@ -27,6 +29,11 @@ class AuthorController extends BaseController
         $author = new Author();
         $form = $this->createForm(AuthorType::class, $author);
         $this->processForm($request, $form);
+
+        if (!$form->isValid()) {
+            return $this->createValidationErrorResponse($form);
+        }
+
         $em = $this->getDoctrine()->getManager();
         $em->persist($author);
         $em->flush();
@@ -96,6 +103,10 @@ class AuthorController extends BaseController
         $form = $this->createForm(UpdateAuthorType::class, $author);
         $this->processForm($request, $form);
 
+        if (!$form->isValid()) {
+            return $this->createValidationErrorResponse($form);
+        }
+
         $em = $this->getDoctrine()->getManager();
         $em->persist($author);
         $em->flush();
@@ -142,13 +153,35 @@ class AuthorController extends BaseController
         $form->submit($data, $clearMissing);
     }
 
-    private function jsonDecode($var)
+
+    private function getErrorsFromForm(FormInterface $form)
     {
-        $data = json_decode($var, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \Exception(json_last_error_msg());
+        $errors = array();
+        foreach ($form->getErrors() as $error) {
+            $errors[] = $error->getMessage();
         }
-        return $data;
+        foreach ($form->all() as $childForm) {
+            if ($childForm instanceof FormInterface) {
+                if ($childErrors = $this->getErrorsFromForm($childForm)) {
+                    $errors[$childForm->getName()] = $childErrors;
+                }
+            }
+        }
+        return $errors;
+    }
+
+    private function createValidationErrorResponse(FormInterface $form)
+    {
+        $errors = $this->getErrorsFromForm($form);
+        $apiProblem = new ApiProblem(
+            400,
+            'validation_error'
+        );
+        $apiProblem->set('errors', $errors);
+        $response = new JsonResponse($apiProblem->toArray(), $apiProblem->getStatusCode());
+        $response->headers->set('Content-Type', 'application/problem+json');
+
+        return $response;
     }
 
 }

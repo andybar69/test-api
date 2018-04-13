@@ -20,6 +20,8 @@ class AppKernel extends Kernel
             new Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle(),
             new \JMS\SerializerBundle\JMSSerializerBundle(),
             new UserBundle\UserBundle(),
+            new Doctrine\Bundle\DoctrineCacheBundle\DoctrineCacheBundle(),
+            new Noxlogic\RateLimitBundle\NoxlogicRateLimitBundle(),
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {

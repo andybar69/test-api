@@ -20,3 +20,12 @@ monolog:
         console:
             type: console
             process_psr_3_messages: false
+
+framework:
+    cache:
+        # defaults to memcached://localhost
+        default_memcached_provider: "memcached://localhost:11211"
+        pools:
+            app.cache.products:
+                adapter: cache.adapter.memcached
+                public: true

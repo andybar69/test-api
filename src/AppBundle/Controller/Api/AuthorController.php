@@ -13,7 +13,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use AppBundle\Entity\Author;
 use AppBundle\Form\UpdateAuthorType;
 use AppBundle\Api\ApiProblem;
-
+use AppBundle\Api\ApiProblemException;
+use Noxlogic\RateLimitBundle\Annotation\RateLimit;
 
 
 class AuthorController extends BaseController
@@ -31,7 +32,7 @@ class AuthorController extends BaseController
         $this->processForm($request, $form);
 
         if (!$form->isValid()) {
-            return $this->createValidationErrorResponse($form);
+            return $this->throwApiProblemValidationException($form);
         }
 
         $em = $this->getDoctrine()->getManager();
@@ -51,6 +52,7 @@ class AuthorController extends BaseController
     /**
      * @Route("/api/authors/{id}", name="api_authors_show")
      * @Method("GET")
+     * @RateLimit(limit=100, period=60)
      */
     public function showAction($id)
     {
@@ -104,7 +106,7 @@ class AuthorController extends BaseController
         $this->processForm($request, $form);
 
         if (!$form->isValid()) {
-            return $this->createValidationErrorResponse($form);
+            return $this->throwApiProblemValidationException($form);
         }
 
         $em = $this->getDoctrine()->getManager();
@@ -182,6 +184,17 @@ class AuthorController extends BaseController
         $response->headers->set('Content-Type', 'application/problem+json');
 
         return $response;
+    }
+
+    private function throwApiProblemValidationException(FormInterface $form)
+    {
+        $errors = $this->getErrorsFromForm($form);
+        $apiProblem = new ApiProblem(
+            400,
+            ApiProblem::TYPE_VALIDATION_ERROR
+        );
+        $apiProblem->set('errors', $errors);
+        throw new ApiProblemException($apiProblem);
     }
 
 }

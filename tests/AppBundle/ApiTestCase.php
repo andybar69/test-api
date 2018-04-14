@@ -64,4 +64,5 @@ class ApiTestCase extends KernelTestCase
         }
         return $this->responseAsserter;
     }
+
 }

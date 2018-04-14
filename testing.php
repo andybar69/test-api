@@ -25,17 +25,20 @@ try {
 catch (GuzzleHttp\Exception\RequestException $ex) {
     printError($ex);
 }
-
-for ($i = 0; $i < 100; $i++) {
+*/
+//for ($i = 0; $i < 100; $i++) {
     try {
+
         $response = $client->get('/test-api/web/app_dev.php/api/authors/1');
         printOK($response);
     } catch (GuzzleHttp\Exception\RequestException $ex) {
         printError($ex);
     }
-    echo $i.PHP_EOL;
-}
-*/
+    /*echo $i.PHP_EOL;
+}*/
+
+
+/*
 for ($i = 0; $i < 50; $i++) {
     try {
         $response = $client->get('/test-api/web/app_dev.php/api/authors', [

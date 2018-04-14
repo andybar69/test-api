@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
+use AppBundle\Annotation\Link;
 
 /**
  * Author
@@ -14,6 +15,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass="AppBundle\Repository\AuthorRepository")
  * @ORM\HasLifecycleCallbacks
  * @Serializer\ExclusionPolicy("all")
+ * @Link(
+ *  "self",
+ *  route = "api_authors_show",
+ *  params = { "id": "object.getId()" }
+ * )
  */
 class Author
 {
@@ -61,6 +67,8 @@ class Author
 
     /**
      * @var Review
+     * @Serializer\Groups({"deep"})
+     * @Serializer\Expose
      */
     private $review;
 

@@ -59,10 +59,16 @@ class AuthorControllerTest extends ApiTestCase
         $this->asserter()->assertResponsePropertyEquals($response, 'uri', '/test-api/web/app_dev.php/api/authors/1');
     }
 
-    public function testUPDATEAuthor()
+    public function testPUTAuthor()
     {
 
     }
+
+    public function testPATCHAuthor()
+    {
+
+    }
+
 /*
     public function testValidationErrors()
     {
@@ -104,4 +110,19 @@ EOF;
         $this->asserter()->assertResponsePropertyEquals($response, 'type', 'about:blank');
         $this->asserter()->assertResponsePropertyEquals($response, 'title', 'Not Found');
     }*/
+
+    public function testRequiresAuthentication()
+    {
+        $data = [
+            'firstName' => 'user_'.substr(uniqid(), 0, 10),
+            'lastName' => 'first_'.substr(uniqid(), 0, 10),
+        ];
+        $response = $this->client->post(self::PATH_TO_API.'/authors', [
+            'headers' => [
+                'Content-Type' => 'application/json;charset=UTF-8',
+            ],
+            GuzzleHttp\RequestOptions::JSON => $data,
+        ]);
+        $this->assertEquals(401, $response->getStatusCode());
+    }
 }

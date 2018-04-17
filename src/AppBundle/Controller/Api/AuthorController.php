@@ -28,6 +28,8 @@ class AuthorController extends BaseController
      */
     public function newAction(Request $request)
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
         $author = new Author();
         $form = $this->createForm(AuthorType::class, $author);
         $this->processForm($request, $form);

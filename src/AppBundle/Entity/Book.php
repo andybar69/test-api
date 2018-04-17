@@ -184,7 +184,7 @@ class Book
     /**
      * @return Author[]|ArrayCollection
      */
-    public function getAuthors(): array
+    public function getAuthors()
     {
         return $this->authors;
     }
@@ -208,7 +208,7 @@ class Book
     /**
      * @return Review[]
      */
-    public function getReviews(): array
+    public function getReviews()
     {
         return $this->reviews;
     }

@@ -152,7 +152,7 @@ class Review
     /**
      * @return Author
      */
-    public function getAuthor(): Author
+    public function getAuthor()
     {
         return $this->author;
     }
@@ -168,7 +168,7 @@ class Review
     /**
      * @return Book
      */
-    public function getBook(): Book
+    public function getBook()
     {
         return $this->book;
     }

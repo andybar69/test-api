@@ -12,6 +12,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use AppBundle\Entity\Author;
 use AppBundle\Form\UpdateAuthorType;
+use AppBundle\Api\ApiProblem;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use AppBundle\Api\ApiProblemException;
 
 
 class AuthorController extends BaseController
@@ -27,6 +30,11 @@ class AuthorController extends BaseController
         $author = new Author();
         $form = $this->createForm(AuthorType::class, $author);
         $this->processForm($request, $form);
+
+        if (/*!$form->isSubmitted() &&*/ !$form->isValid()) {
+            return $this->createValidationErrorResponse($form);
+        }
+
         $em = $this->getDoctrine()->getManager();
         $em->persist($author);
         $em->flush();
@@ -96,6 +104,10 @@ class AuthorController extends BaseController
         $form = $this->createForm(UpdateAuthorType::class, $author);
         $this->processForm($request, $form);
 
+        if (!$form->isSubmitted() && $form->isValid()) {
+            return $this->createValidationErrorResponse($form);
+        }
+
         $em = $this->getDoctrine()->getManager();
         $em->persist($author);
         $em->flush();
@@ -145,10 +157,46 @@ class AuthorController extends BaseController
     private function jsonDecode($var)
     {
         $data = json_decode($var, true);
+        var_dump(json_last_error());
+        var_dump($data);
+        if ($data === null) {
+            $apiProblem = new ApiProblem(400, ApiProblem::TYPE_INVALID_REQUEST_BODY_FORMAT);
+            throw new ApiProblemException($apiProblem);
+        }
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \Exception(json_last_error_msg());
+            throw new \Exception("JSON decode exception: ".json_last_error_msg());
         }
         return $data;
+    }
+
+    private function getErrorsFromForm(FormInterface $form)
+    {
+        $errors = array();
+        foreach ($form->getErrors() as $error) {
+            $errors[] = $error->getMessage();
+        }
+        foreach ($form->all() as $childForm) {
+            if ($childForm instanceof FormInterface) {
+                if ($childErrors = $this->getErrorsFromForm($childForm)) {
+                    $errors[$childForm->getName()] = $childErrors;
+                }
+            }
+        }
+        return $errors;
+    }
+
+    private function createValidationErrorResponse(FormInterface $form)
+    {
+        $errors = $this->getErrorsFromForm($form);
+        $apiProblem = new ApiProblem(
+            400,
+            'validation_error'
+        );
+        $apiProblem->set('errors', $errors);
+        $response = new JsonResponse($apiProblem->toArray(), $apiProblem->getStatusCode());
+        $response->headers->set('Content-Type', 'application/problem+json');
+
+        return $response;
     }
 
 }

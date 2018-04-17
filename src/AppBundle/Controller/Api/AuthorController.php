@@ -15,6 +15,7 @@ use AppBundle\Form\UpdateAuthorType;
 use AppBundle\Api\ApiProblem;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use AppBundle\Api\ApiProblemException;
+use Noxlogic\RateLimitBundle\Annotation\RateLimit;
 
 
 class AuthorController extends BaseController
@@ -31,8 +32,8 @@ class AuthorController extends BaseController
         $form = $this->createForm(AuthorType::class, $author);
         $this->processForm($request, $form);
 
-        if (/*!$form->isSubmitted() &&*/ !$form->isValid()) {
-            return $this->createValidationErrorResponse($form);
+        if (!$form->isValid()) {
+            return $this->throwApiProblemValidationException($form);
         }
 
         $em = $this->getDoctrine()->getManager();
@@ -52,6 +53,7 @@ class AuthorController extends BaseController
     /**
      * @Route("/api/authors/{id}", name="api_authors_show")
      * @Method("GET")
+     * @RateLimit(limit=100, period=60)
      */
     public function showAction($id)
     {
@@ -104,8 +106,8 @@ class AuthorController extends BaseController
         $form = $this->createForm(UpdateAuthorType::class, $author);
         $this->processForm($request, $form);
 
-        if (!$form->isSubmitted() && $form->isValid()) {
-            return $this->createValidationErrorResponse($form);
+        if (!$form->isValid()) {
+            return $this->throwApiProblemValidationException($form);
         }
 
         $em = $this->getDoctrine()->getManager();
@@ -154,20 +156,6 @@ class AuthorController extends BaseController
         $form->submit($data, $clearMissing);
     }
 
-    private function jsonDecode($var)
-    {
-        $data = json_decode($var, true);
-        var_dump(json_last_error());
-        var_dump($data);
-        if ($data === null) {
-            $apiProblem = new ApiProblem(400, ApiProblem::TYPE_INVALID_REQUEST_BODY_FORMAT);
-            throw new ApiProblemException($apiProblem);
-        }
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \Exception("JSON decode exception: ".json_last_error_msg());
-        }
-        return $data;
-    }
 
     private function getErrorsFromForm(FormInterface $form)
     {
@@ -199,4 +187,14 @@ class AuthorController extends BaseController
         return $response;
     }
 
+    private function throwApiProblemValidationException(FormInterface $form)
+    {
+        $errors = $this->getErrorsFromForm($form);
+        $apiProblem = new ApiProblem(
+            400,
+            ApiProblem::TYPE_VALIDATION_ERROR
+        );
+        $apiProblem->set('errors', $errors);
+        throw new ApiProblemException($apiProblem);
+    }
 }

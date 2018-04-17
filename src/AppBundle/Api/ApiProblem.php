@@ -5,49 +5,56 @@ namespace AppBundle\Api;
 /**
  * A wrapper for holding data to be used for a application/problem+json response
  */
+
+use Symfony\Component\HttpFoundation\Response;
+
 class ApiProblem
 {
     const TYPE_VALIDATION_ERROR = 'validation_error';
     const TYPE_INVALID_REQUEST_BODY_FORMAT = 'invalid_body_format';
-
-    private static $titles = [
+    private static $titles = array(
         self::TYPE_VALIDATION_ERROR => 'There was a validation error',
         self::TYPE_INVALID_REQUEST_BODY_FORMAT => 'Invalid JSON format sent',
-    ];
-
+    );
     private $statusCode;
     private $type;
     private $title;
-    private $extraData;
+    private $extraData = [];
 
-    public function __construct($statusCode, $type)
+    public function __construct($statusCode, $type = null)
     {
         $this->statusCode = $statusCode;
-        $this->type = $type;
-
-        if (!isset(self::$titles[$type])) {
-            throw new \InvalidArgumentException('No title for type '.$type);
+        if ($type === null) {
+            // no type? The default is about:blank and the title should
+            // be the standard status code message
+            $type = 'about:blank';
+            $title = isset(Response::$statusTexts[$statusCode])
+                ? Response::$statusTexts[$statusCode]
+                : 'Unknown status code :(';
+        } else {
+            if (!isset(self::$titles[$type])) {
+                throw new \InvalidArgumentException('No title for type '.$type);
+            }
+            $title = self::$titles[$type];
         }
-
-        $this->title = self::$titles[$type];
-        $this->extraData = [];
-    }
-
-    public function set($name, $value)
-    {
-        $this->extraData[$name] = $value;
+        $this->type = $type;
+        $this->title = $title;
     }
 
     public function toArray()
     {
         return array_merge(
-            $this->extraData,
-            array(
+            $this->extraData, [
                 'status' => $this->statusCode,
                 'type' => $this->type,
                 'title' => $this->title,
-            )
+            ]
         );
+    }
+
+    public function set($name, $value)
+    {
+        $this->extraData[$name] = $value;
     }
 
     public function getStatusCode()

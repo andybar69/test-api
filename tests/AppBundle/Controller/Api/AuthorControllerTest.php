@@ -8,7 +8,7 @@ use Tests\AppBundle\ApiTestCase;
 
 class AuthorControllerTest extends ApiTestCase
 {
-    const PATH_TO_API = '/test-api/web/app_dev.php/api';
+
     /*
     public function testShow()
     {
@@ -61,7 +61,6 @@ class AuthorControllerTest extends ApiTestCase
 
     public function testPUTAuthor()
     {
-
     }
 
     public function testPATCHAuthor()

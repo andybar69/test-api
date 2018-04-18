@@ -13,12 +13,12 @@ $data = [
     'lastName' => 'Lineker',
     //'nickname' => 'goaleodor'
 ];
-$invalidBody = <<<EOF
+$invalidBody = [];/*<<<EOF
 {
     "avatarNumber" : "2
     "tagLine": "I'm from a test!"
 }
-EOF;
+EOF;*/
 try {
     $response = $client->post('/test-api/web/app_dev.php/api/authors', [
         'headers' => [
@@ -33,7 +33,7 @@ catch (GuzzleHttp\Exception\RequestException $ex) {
     printError($ex);
 }
 
-
+/*
 //for ($i = 0; $i < 100; $i++) {
     try {
 

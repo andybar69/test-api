@@ -9,6 +9,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ApiTestCase extends KernelTestCase
 {
+    const PATH_TO_API = '/test-api/web/app_dev.php/api';
+
     private static $staticClient;
     /**
      * @var Client

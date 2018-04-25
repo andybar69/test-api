@@ -28,6 +28,7 @@ class BaseController extends Controller
             'Content-Type' => 'application/json;charset=UTF-8'
         ]);
     }
+
     protected function serialize($data, $format = 'json')
     {
         $context = new SerializationContext();
@@ -42,5 +43,15 @@ class BaseController extends Controller
 
         return $this->container->get('jms_serializer')
             ->serialize($data, $format, $context);
+    }
+
+    protected function throwInvalidCredentialsException()
+    {
+        $apiProblem = new ApiProblem(
+            401,
+            ApiProblem::TYPE_INVALID_CREDENTIALS
+        );
+        //$apiProblem->set('errors', '');
+        throw new ApiProblemException($apiProblem);
     }
 }

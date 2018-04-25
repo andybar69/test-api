@@ -3,6 +3,7 @@
 security:
     encoders:
         Symfony\Component\Security\Core\User\User: bcrypt
+        UserBundle\Entity\User: bcrypt
     # https://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
     providers:
 #        in_memory:

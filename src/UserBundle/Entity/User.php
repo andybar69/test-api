@@ -51,14 +51,6 @@ class User implements UserInterface, EquatableInterface
      */
     private $createdAt;
 
-    public function __construct($username, $password, $salt, array $roles)
-    {
-        $this->username = $username;
-        $this->password = $password;
-        $this->salt = $salt;
-        $this->roles = $roles;
-    }
-
     /**
      * @return mixed
      */
@@ -67,25 +59,70 @@ class User implements UserInterface, EquatableInterface
         return $this->id;
     }
 
-    public function getRoles()
+    /**
+     * @param mixed $username
+     */
+    public function setUsername($username)
     {
-        return $this->roles;
+        $this->username = $username;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getUsername()
+    {
+        return $this->username;
+    }
+
+    /**
+     * @param mixed $password
+     */
+    public function setPassword($password)
+    {
+        $this->password = $password;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getPassword()
     {
         return $this->password;
     }
 
+    /**
+     * @param mixed $roles
+     */
+    public function setRoles(array $roles)
+    {
+        $this->roles = $roles;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRoles()
+    {
+        return $this->roles;
+    }
+
+    /**
+     * @param mixed $salt
+     */
+    public function setSalt($salt)
+    {
+        $this->salt = $salt;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getSalt()
     {
         return $this->salt;
     }
 
-    public function getUsername()
-    {
-        return $this->username;
-    }
 
     public function eraseCredentials()
     {
